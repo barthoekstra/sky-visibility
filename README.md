@@ -15,6 +15,6 @@ The map below shows, based on the DSM, the number of degrees of clear line-of-si
 
 Alternatively, you can also think of it from the perspective of an imaginary moving sun. If the sun would rotate 360 degrees around us and never go down, but it would always be 15 degrees above the horizon, this shows the number of degrees (0-360 degrees) you can see the sun from at each location.
 
-It makes intuitive sense that with a sun that low above the horizon, the only areas you can really see the sun from most of the time are the flat areas on the left side of the map with no obstructions nearby. Similarly, close to obstructions, or in an open area in between trees, there are few area from which you have clear line-of-sight of the sun. Deep in the forest, you never see the sun directly (assuming light cannot shine through trees).
+It makes intuitive sense that with a sun that low above the horizon, the only areas you can really see the sun from most of the time are the flat areas on the left side of the map with no obstructions nearby. Similarly, close to obstructions, or in an open area in between trees, it is much rarer to have clear line-of-sight of the sun — you want to go as far as possible from obstructions to see the sun. Deep in the forest, you never see the sun directly (assuming light cannot shine through trees).
 
 ![The Sky Visibility](images/skyvis.png)
