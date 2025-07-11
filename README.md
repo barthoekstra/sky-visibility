@@ -1,10 +1,13 @@
 # sky-visibility
-
 Sometimes you just find yourself in a situation where you have to calculate how much clear sky you can see above a certain elevation (an angle above the horizon), for example if you have to place a radar somewhere which needs a clear line-of-sight above 30 degrees. Many of the GIS tools that you can use require pre-selecting certain ‘viewpoints’ from which to calculate it, or they assume you’re standing on the ground.
 
 Anyhow, this calculates the proportion and the number of degrees of clear line-of-sight or ‘sky visibility’ above a certain threshold elevation (angle in degrees above to the horizon) across a digital elevation model. And it works with digital surface models too, so you can also check what the sky visibility is on e.g. rooftops or next to buildings.
 
-Let’s use an example for clarification.
+[View the rendered .Rmd file](https://barthoekstra.github.io/sky-visibility/Sky-Visibility.html)
+
+---
+
+Still here? Let’s use an example for clarification.
 
 ## The digital surface model (DSM):
 
