@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+data/full_dsm.TIF
+data/studyarea.geojson
+.DS_Store

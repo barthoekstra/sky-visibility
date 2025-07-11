@@ -1,0 +1,151 @@
+---
+title: "Sky Visibility Analysis"
+author: "Bart Hoekstra"
+output: html_document
+---
+
+Sometimes you just find yourself in a situation where you have to calculate how much clear sky you can see above a certain elevation (an angle above the horizon), for example if you have to place a radar somewhere which needs a clear line-of-sight above 30 degrees. Many of the GIS tools that you can use require pre-selecting certain ‘viewpoints’ from which to calculate it, or they assume you're standing on the ground. 
+
+Anyhow, this calculates the proportion and the number of degrees of clear line-of-sight or ‘sky visibility’ above a certain threshold elevation (angle in degrees above to the horizon) across a digital elevation model. And it works with digital surface models too, so you can also check what the sky visibility is on e.g. rooftops or next to buildings.
+
+Let's use an example for clarification.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(terra)
+library(tidyterra)
+library(rayshader)
+library(parallel)
+library(pbmcapply)
+library(patchwork)
+library(ggplot2)
+```
+
+# Load data
+Loads the raw digital surface model (DSM) (in this case from the [Algemeen Hoogtebestand Nederland](https://www.ahn.nl/dataroom) LiDAR dataset) and an (optional) study area. It also projects the study area to match the DSM's coordinate reference system and crops the DSM to the area of interest, reducing computational load if needed
+
+```{r}
+# Load DSM and study area
+full_dsm <- "data/full_dsm.TIF"
+studyarea <- "data/studyarea.geojson"
+if (file.exists(full_dsm) & file.exists(studyarea)) {
+  dsm_raw <- rast(full_dsm) # LIDAR-based Digital Surface Model
+  studyarea <- vect(studyarea) %>% terra::project(crs(dsm_raw))
+  dsm <- crop(dsm_raw, studyarea)
+} else {
+  dsm <- rast("data/dsm.tif")
+}
+```
+
+# Sky Visibility function
+`compute_sky_visibility()` calculates the sky visibility (in degrees or proportion) from each pixel towards an imaginary light source along `azimuths` and a fixed `sun_elevation` (we're simulating a point-source sun). It does this by simulating shadows from multiple directions using `ray_shade()` and summarizing the output. The result is returned as a georeferenced raster layer with the same CRS and extent as the input DSM.
+
+```{r}
+compute_sky_visibility <- function(dsm,
+                                   zscale = 1,
+                                   sun_elevation = 30,
+                                   azimuths = 0:359,
+                                   cores = parallel::detectCores() - 1,
+                                   out = "degrees") {
+  mat <- as.matrix(dsm, wide = TRUE)
+
+  compute_one_direction <- function(az) {
+    ray_shade(
+      heightmap = mat,
+      anglebreaks = sun_elevation,
+      sunangle = az,
+      zscale = zscale,
+      multicore = FALSE, # no nested parallelism
+      lambert = FALSE
+    )
+  }
+
+  shade_stack <- pbmclapply(
+    azimuths,
+    compute_one_direction,
+    mc.cores = cores
+  )
+
+  sky_visibility_mat <- Reduce("+", shade_stack)
+  if (out == "degrees") {
+    sky_visibility_mat <- sky_visibility_mat / length(azimuths) * 360
+  } else if (out == "prop") {
+    sky_visibility_mat <- sky_visibility_mat / length(azimuths)
+  }
+
+  r_out <- flip(rast(sky_visibility_mat))
+  names(r_out) <- paste0("deg_visibility_above_", sun_elevation, "_deg")
+  crs(r_out) <- crs(dsm)
+  ext(r_out) <- ext(dsm)
+
+  return(r_out)
+}
+```
+
+# Compute sky visibility
+Applies the `compute_sky_visibility()` function to the DSM to compute sky visibility above two elevation angles (15° and 30°). It also computes a variant of the 30° visibility where a high tower has been removed to simulate the landscape without obstructions.
+
+```{r, results='hide'}
+sun_deg_15 <- compute_sky_visibility(dsm, sun_elevation = 15)
+sun_deg_30 <- compute_sky_visibility(dsm, sun_elevation = 30)
+
+# Remove tower: force all high points to base elevation
+dsm_notower <- dsm
+dsm_notower[dsm_notower > 30] <- min(values(dsm_notower), na.rm = TRUE)
+sun_deg_30_notower <- compute_sky_visibility(dsm_notower, sun_elevation = 30)
+```
+
+# Create plots
+```{r}
+ext <- as.vector(ext(dsm))
+
+plot_deg_15 <- ggplot() +
+  geom_spatraster(data = sun_deg_15) +
+  scale_fill_viridis_c(option = "magma", name = "deg.", breaks = c(0, 90, 180, 270, 360)) +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 3)(ext[c("xmin", "xmax")])) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 3)(ext[c("ymin", "ymax")])) +
+  coord_sf(expand = FALSE, datum = pull_crs(dsm)) +
+  labs(title = "Sky visibility above an elevation of 15 degrees")
+
+plot_deg_30 <- ggplot() +
+  geom_spatraster(data = sun_deg_30) +
+  scale_fill_viridis_c(option = "magma", name = "deg.", breaks = c(0, 90, 180, 270, 360)) +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 3)(ext[c("xmin", "xmax")])) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 3)(ext[c("ymin", "ymax")])) +
+  coord_sf(expand = FALSE, datum = pull_crs(dsm)) +
+  labs(title = "Sky visibility above an elevation of 30 degrees")
+
+plot_deg_30_notower <- ggplot() +
+  geom_spatraster(data = sun_deg_30_notower) +
+  scale_fill_viridis_c(option = "magma", name = "deg.", breaks = c(0, 90, 180, 270, 360)) +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 3)(ext[c("xmin", "xmax")])) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 3)(ext[c("ymin", "ymax")])) +
+  coord_sf(expand = FALSE, datum = pull_crs(dsm)) +
+  labs(title = "Sky visibility above an elevation of 30 degrees without tower")
+
+plot_dsm <- ggplot() +
+  geom_spatraster(data = dsm) +
+  scale_fill_viridis_c(option = "magma", name = "height") +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 3)(ext[c("xmin", "xmax")])) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 3)(ext[c("ymin", "ymax")])) +
+  coord_sf(expand = FALSE, datum = pull_crs(dsm)) +
+  labs(title = "Digital Surface Model")
+```
+
+# Plot combined results
+
+Let's first plot the digital surface model, which shows a terrain, some buildings, trees, and a tall water tower.
+
+```{r, results='hold', out.width="100%"}
+plot_dsm
+```
+
+And now we can see how that impacts the visibility of the sky. You can see how taller objects cause a shade on lower objects. Since we are rotating the ‘sun’ across 360 azimuths, shadows are on all sides of objects, but the shape of the shadow depends on the interaction between the object on the creating and receiving end of the shade. 
+
+```{r, results='hold', out.width="100%"}
+plot_deg_15
+plot_deg_30
+plot_deg_30_notower
+```
+
+For positioning a radar — or anything else you would like clear sky views for —, given a certain sky visibility elevation threshold, you would like to select areas with as close as possible to 360° sky visibility. So some of the flat rooftop on the northeast side of the map would be very suitable. In case the sky visibility elevation threshold would be 15 degrees or lower, only one rooftop remains fully suitable.
