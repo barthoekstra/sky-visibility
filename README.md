@@ -18,3 +18,6 @@ Alternatively, you can also think of it from the perspective of an imaginary mov
 It makes intuitive sense that with a sun that low above the horizon, the only areas you can really see the sun from most of the time are the flat areas on the left side of the map with no obstructions nearby. Similarly, close to obstructions, or in an open area in between trees, it is much rarer to have clear line-of-sight of the sun — you want to go as far as possible from obstructions to see the sun. Deep in the forest, you never see the sun directly (assuming light cannot shine through trees).
 
 ![The Sky Visibility](images/skyvis.png)
+
+## Full explanation
+For a full explanation of the `sky visibility’ calculations, see [this rendered Rmd file](https://barthoekstra.github.io/sky-visibility/Sky-Visibility.html) or run the example code after cloning this repository.
