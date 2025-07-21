@@ -148,4 +148,21 @@ plot_deg_30
 plot_deg_30_notower
 ```
 
-For positioning a radar — or anything else you would like clear sky views for —, given a certain sky visibility elevation threshold, you would like to select areas with as close as possible to 360° sky visibility. So some of the flat rooftop on the northeast side of the map would be very suitable. In case the sky visibility elevation threshold would be 15 degrees or lower, only one rooftop remains fully suitable.
+For positioning a radar — or anything else you need clear sky views for —, given a certain sky visibility elevation threshold, you would like to select areas with as close as possible to 360° sky visibility. So the flat rooftops on the northeast side of the map could be very suitable. In case the sky visibility elevation threshold would be 30 degrees or lower, only one rooftop remains fully suitable.
+
+```{r}
+sun_deg_30_v <- sun_deg_30
+
+sun_deg_30_v[sun_deg_30_v < 360] <- 0
+plot(sun_deg_30_v)
+```
+
+If the tower were not there, the other rooftops would also be suitable.
+
+```{r}
+sun_deg_30_v_notower <- sun_deg_30_notower
+
+sun_deg_30_v_notower[sun_deg_30_v_notower < 360] <- 0
+plot(sun_deg_30_v_notower)
+```
+
