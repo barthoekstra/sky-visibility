@@ -445,7 +445,7 @@ to compute sky visibility above two elevation angles (15° and 30°). It
 also computes a variant of the 30° visibility where a high tower has
 been removed to simulate the landscape without obstructions. Make sure
 to set the correct <code>zscale</code>, the ratio between the x and y
-spacing (which should be equal) and the z-spacing, zee <a href="https://www.rayshader.com/reference/ray_shade.html"><code>rayshader</code>
+spacing (which should be equal) and the z-spacing, see <a href="https://www.rayshader.com/reference/ray_shade.html"><code>rayshader</code>
 documentation</a>. In this case <code>zscale = 0.5/1 = 0.5</code>,
 because the spacing between grid cells is 0.5m and the elevation is
 measured in meters.</p>
@@ -515,7 +515,7 @@ for —, given a certain sky visibility elevation threshold, you would
 like to select areas with as close as possible to 360° sky visibility.
 So the flat rooftops on the northeast side of the map could be very
 suitable. In case the sky visibility elevation threshold would be 30
-degrees or lower, only one rooftop remains fully suitable.</p>
+degrees or lower, only one rooftop really remains fully suitable.</p>
 <pre class="r"><code>sun_deg_30_v &lt;- sun_deg_30
 
 sun_deg_30_v[sun_deg_30_v &lt; 360] &lt;- 0

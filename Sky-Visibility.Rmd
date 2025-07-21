@@ -83,7 +83,7 @@ compute_sky_visibility <- function(dsm,
 ```
 
 # Compute sky visibility
-Applies the `compute_sky_visibility()` function to the DSM to compute sky visibility above two elevation angles (15° and 30°). It also computes a variant of the 30° visibility where a high tower has been removed to simulate the landscape without obstructions. Make sure to set the correct `zscale`, the ratio between the x and y spacing (which should be equal) and the z-spacing, zee [`rayshader` documentation](https://www.rayshader.com/reference/ray_shade.html). In this case `zscale = 0.5/1 = 0.5`, because the spacing between grid cells is 0.5m and the elevation is measured in meters.
+Applies the `compute_sky_visibility()` function to the DSM to compute sky visibility above two elevation angles (15° and 30°). It also computes a variant of the 30° visibility where a high tower has been removed to simulate the landscape without obstructions. Make sure to set the correct `zscale`, the ratio between the x and y spacing (which should be equal) and the z-spacing, see [`rayshader` documentation](https://www.rayshader.com/reference/ray_shade.html). In this case `zscale = 0.5/1 = 0.5`, because the spacing between grid cells is 0.5m and the elevation is measured in meters.
 
 ```{r, results='hide'}
 sun_deg_15 <- compute_sky_visibility(dsm, sun_elevation = 15, zscale = 0.5)
@@ -148,7 +148,7 @@ plot_deg_30
 plot_deg_30_notower
 ```
 
-For positioning a radar — or anything else you need clear sky views for —, given a certain sky visibility elevation threshold, you would like to select areas with as close as possible to 360° sky visibility. So the flat rooftops on the northeast side of the map could be very suitable. In case the sky visibility elevation threshold would be 30 degrees or lower, only one rooftop remains fully suitable.
+For positioning a radar — or anything else you need clear sky views for —, given a certain sky visibility elevation threshold, you would like to select areas with as close as possible to 360° sky visibility. So the flat rooftops on the northeast side of the map could be very suitable. In case the sky visibility elevation threshold would be 30 degrees or lower, only one rooftop really remains fully suitable.
 
 ```{r}
 sun_deg_30_v <- sun_deg_30
