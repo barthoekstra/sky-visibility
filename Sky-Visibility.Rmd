@@ -83,16 +83,16 @@ compute_sky_visibility <- function(dsm,
 ```
 
 # Compute sky visibility
-Applies the `compute_sky_visibility()` function to the DSM to compute sky visibility above two elevation angles (15° and 30°). It also computes a variant of the 30° visibility where a high tower has been removed to simulate the landscape without obstructions.
+Applies the `compute_sky_visibility()` function to the DSM to compute sky visibility above two elevation angles (15° and 30°). It also computes a variant of the 30° visibility where a high tower has been removed to simulate the landscape without obstructions. Make sure to set the correct `zscale`, the ratio between the x and y spacing (which should be equal) and the z-spacing, zee [`rayshader` documentation](https://www.rayshader.com/reference/ray_shade.html). In this case `zscale = 0.5/1 = 0.5`, because the spacing between grid cells is 0.5m and the elevation is measured in meters.
 
 ```{r, results='hide'}
-sun_deg_15 <- compute_sky_visibility(dsm, sun_elevation = 15)
-sun_deg_30 <- compute_sky_visibility(dsm, sun_elevation = 30)
+sun_deg_15 <- compute_sky_visibility(dsm, sun_elevation = 15, zscale = 0.5)
+sun_deg_30 <- compute_sky_visibility(dsm, sun_elevation = 30, zscale = 0.5)
 
 # Remove tower: force all high points to base elevation
 dsm_notower <- dsm
 dsm_notower[dsm_notower > 30] <- min(values(dsm_notower), na.rm = TRUE)
-sun_deg_30_notower <- compute_sky_visibility(dsm_notower, sun_elevation = 30)
+sun_deg_30_notower <- compute_sky_visibility(dsm_notower, sun_elevation = 30, zscale = 0.5)
 ```
 
 # Create plots
